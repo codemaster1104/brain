@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    
+    #calculator {
+      width: 300px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .input {
+      width: 100%;
+      height: 40px;
+      margin-bottom: 20px;
+      padding: 10px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .buttons {
+      margin-top: 20px;
+    }
+    
+    button {
+      width: 100%;
+      height: 40px;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #ccc;
+    }
+    
+    .result {
+      width: 100%;
+      height: 40px;
+      padding: 10px;
+      font-size: 24px;
+      text-align: right;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="calculator">
+    <input type="text" id="result" class="input result">
+    
+    <button class="buttons">+</button>
+    <button class="buttons">-</button>
+    <button class="buttons">*</button>
+    <button class="buttons">/</button>
+    
+    <button class="buttons">7</button>
+    <button class="buttons">8</button>
+    <button class="buttons">9</button>
+    
+    <button class="buttons">4</button>
+    <button class="buttons">5</button>
+    <button class="buttons">6</button>
+    
+    <button class="buttons">1</button>
+    <button class="buttons">2</button>
+    <button class="buttons">3</button>
+    
+    <button class="buttons">0</button>
+    <button class="buttons">.</button>
+    <button class="buttons" id="equal">=</button>
+    <button class="buttons">C</button>
+  </div>
+  
+  <script>
+    const buttons = document.querySelectorAll('button');
+    let equation = '';
+    
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (button.id === 'equal') {
+          try {
+            const result = eval(equation);
+            document.getElementById('result').value = result;
+            equation = result.toString();
+          } catch (e) {
+            document.getElementById('result').value = 'Error';
+            equation = '';
+          }
+        } else {
+          const value = button.textContent;
+          if (value === 'C') {
+            equation = '';
+            document.getElementById('result').value = equation;
+          } else {
+            equation += value;
+            document.getElementById('result').value = equation;
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
