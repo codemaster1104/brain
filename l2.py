@@ -43,7 +43,7 @@ def fout(source_text):
     client = openai.OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
     chat_completion = client.chat.completions.create(
         messages=[
-            {"role": "system", "content": "Provide the final output of the task as a JSON object with keys 'html', 'css', and 'js' for the respective file contents.Output should be just a JSON file with full code nothing else"},
+            {"role": "system", "content": "Provide the final output of the task in differnt sections with each section starting with '#$%^&<section_heading>#$%^&' and code it out"},
             {"role": "user", "content": source_text},
         ],
         model=MODEL_NAME,
