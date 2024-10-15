@@ -18,6 +18,13 @@ import json
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.base_language import BaseLanguageModel
 from langchain.agents import AgentExecutor
+from langchain_community.tools.file_management.copy import CopyFileTool
+from langchain_community.tools.file_management.delete import DeleteFileTool
+from langchain_community.tools.file_management.file_search import FileSearchTool
+from langchain_community.tools.file_management.list_dir import ListDirectoryTool
+from langchain_community.tools.file_management.move import MoveFileTool
+from langchain_community.tools.file_management.read import ReadFileTool
+from langchain_community.tools.file_management.write import WriteFileTool
 
 ####################################################LLM####################################################
 
@@ -276,96 +283,130 @@ class CodeGenerationAndExecutionTool(BaseTool):
 #         return self._run(query)
 
 
-class LLMFileFolderGenerationTool(BaseTool):
-    name = "llm_file_folder_generation"
-    description = "A tool that generates a file and folder structure based on a given specification, when need to create files or a project structure."
-    # llm: BaseLanguageModel
+# class LLMFileFolderGenerationTool(BaseTool):
+#     name = "llm_file_folder_generation"
+#     description = "A tool that generates a file and folder structure based on a given specification, when need to create files or a project structure."
+#     # llm: BaseLanguageModel
 
-    def _run(self, query: str) -> str:
-        if not self._should_generate_files(query):
-            return "No file or folder generation is needed for this query."
+#     def _run(self, query: str) -> str:
+#         if not self._should_generate_files(query):
+#             return "No file or folder generation is needed for this query."
 
-        try:
-            structure = self._extract_structure(query)
-            root_dir = os.getcwd()
-            # os.mkdir(agent_result)
-            self._generate_structure(root_dir, structure)
-            return f"File and folder structure generated successfully in '{root_dir}' directory."
-        except ValueError as e:
-            return f"Error: {str(e)}"
-        except Exception as e:
-            return f"Unexpected error: {str(e)}"
+#         try:
+#             structure = self._extract_structure(query)
+#             root_dir = os.getcwd()
+#             # os.mkdir(agent_result)
+#             self._generate_structure(root_dir, structure)
+#             return f"File and folder structure generated successfully in '{root_dir}' directory."
+#         except ValueError as e:
+#             return f"Error: {str(e)}"
+#         except Exception as e:
+#             return f"Unexpected error: {str(e)}"
 
-    def _should_generate_files(self, query: str) -> bool:
-        prompt = f"""
-        Determine if the following query is requesting to create files or a project structure:
-        Query: {query}
-        Answer with 'Yes' or 'No'.
-        """
-        response = llama_tool(prompt)
-        return response.strip().lower() == 'yes'
+#     def _should_generate_files(self, query: str) -> bool:
+#         prompt = f"""
+#         Determine if the following query is requesting to create files or a project structure:
+#         Query: {query}
+#         Answer with 'Yes' or 'No'.
+#         """
+#         response = llama_tool(prompt)
+#         return response.strip().lower() == 'yes'
 
-    def _extract_structure(self, query: str) -> Dict[str, Any]:
-        prompt = f"""
-        Based on the following query, generate a JSON structure representing the requested file and folder structure.
-        Use the following format:
-        {{
-            "project_name": {{
-                "folder1": {{
-                    "file1.ext": "file content",
-                    "subfolder": {{
-                        "file2.ext": "file content"
-                    }}
-                }},
-                "folder2": {{
-                    "file3.ext": "file content"
-                }},
-                "Readme.txt": "Project README content"
-            }}
-        }}
-        Query: {query}
-        JSON structure:
-        """
+#     def _extract_structure(self, query: str) -> Dict[str, Any]:
+#         prompt = f"""
+#         Based on the following query, generate a JSON structure representing the requested file and folder structure.
+#         Use the following format:
+#         {{
+#             "project_name": {{
+#                 "folder1": {{
+#                     "file1.ext": "file content",
+#                     "subfolder": {{
+#                         "file2.ext": "file content"
+#                     }}
+#                 }},
+#                 "folder2": {{
+#                     "file3.ext": "file content"
+#                 }},
+#                 "Readme.txt": "Project README content"
+#             }}
+#         }}
+#         Query: {query}
+#         JSON structure:
+#         """
 
-        response = self.llm(prompt)
+#         response = self.llm(prompt)
 
-        print(response)
-        try:
-            return json.loads(response)
-        except json.JSONDecodeError:
-            raise ValueError("Failed to generate a valid file structure. Please try again with a more specific request.")
+#         print(response)
+#         try:
+#             return json.loads(response)
+#         except json.JSONDecodeError:
+#             raise ValueError("Failed to generate a valid file structure. Please try again with a more specific request.")
 
-    def _generate_structure(self, root_dir: str, structure: Dict[str, Any]) -> None:
-        for name, content in structure.items():
-            path = os.path.join(root_dir, name)
-            if isinstance(content, dict):
-                os.makedirs(path, exist_ok=True)
-                self._generate_structure(path, content)
-            else:
-                with open(path, 'w') as f:
-                    f.write(str(content))
+#     def _generate_structure(self, root_dir: str, structure: Dict[str, Any]) -> None:
+#         for name, content in structure.items():
+#             path = os.path.join(root_dir, name)
+#             if isinstance(content, dict):
+#                 os.makedirs(path, exist_ok=True)
+#                 self._generate_structure(path, content)
+#             else:
+#                 with open(path, 'w') as f:
+#                     f.write(str(content))
 
-    async def _arun(self, query: str) -> str:
-        return self._run(query)
+#     async def _arun(self, query: str) -> str:
+#         return self._run(query)
 
 #############################################agents####################################################
 
 
+# memory = ConversationBufferMemory(memory_key="chat_history")
+# # memory=ConversationBufferWindowMemory(k=5)
+# tools= [InternetSearchTool(),CodeGenerationAndExecutionTool(),CopyFileTool(),DeleteFileTool(),FileSearchTool(),ListDirectoryTool(),MoveFileTool(),ReadFileTool(),WriteFileTool()]
+
+# agent = initialize_agent(
+#     tools,
+#     llama_tool,
+#     agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
+#     # agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+#     verbose=True,
+#     memory=memory,
+#     handle_parsing_errors=True
+# )
+# # agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+
+# def process_query(query: str):
+#     response = agent.invoke(query)
+#     print(response)
+
+# def main():
+#     try:
+#         query = input("Enter your query (e.g., 'create a simple calculator'): ")
+#         process_query(query)
+#     except Exception as e:
+#         print(f"An error occurred: {str(e)}")
+#         print("Please ensure all required packages are installed and up-to-date.")
+
+# if __name__ == "__main__":
+#     main()
+
 memory = ConversationBufferMemory(memory_key="chat_history")
-# memory=ConversationBufferWindowMemory(k=5)
-tools= [InternetSearchTool(),CodeGenerationAndExecutionTool(),LLMFileFolderGenerationTool(llm=llama_tool)]
+tools = [
+    InternetSearchTool(),
+    CodeGenerationAndExecutionTool(),
+    # FileSearchTool(),
+    ListDirectoryTool(),
+    ReadFileTool()
+    # WriteFileTool()
+]
 
 agent = initialize_agent(
     tools,
     llama_tool,
     agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
-    # agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     memory=memory,
     handle_parsing_errors=True
 )
-# agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-
 
 def process_query(query: str):
     response = agent.invoke(query)
