@@ -1,3 +1,4 @@
+import langchain ###########################
 from typing import Dict, List, Any, Optional
 from langchain.llms.base import LLM
 from langchain.prompts import PromptTemplate
@@ -153,7 +154,7 @@ Final Answer: {output_format}
 
 class LLMSmartChainOfThought:
     def __init__(self, 
-                 primary_llm: LLM = llama_llm,
+                 primary_llm: LLM = llama_tool,
                  tool_llm: LLM = llama_tool,
                  temperature: float = 0.1,
                  verbose: bool = True):
